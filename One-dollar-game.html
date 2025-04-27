@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoxQuest - Virtual Investment Adventure</title>
+    <meta name="description" content="Experience gamified investing with BoxQuest! Purchase virtual boxes, track your portfolio, and compete in our immersive investment challenge.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --secondary: #3498db;
+            --accent: #f1c40f;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .wallet-container {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .box-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .box {
+            background: #34495e;
+            border: 2px solid var(--secondary);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+        }
+
+        .achievement-badge {
+            background: #e67e22;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        #purchasePanel {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>BoxQuest 🎮💼</h1>
+        <p>Your Virtual Investment Adventure Begins!</p>
+    </header>
+
+    <div class="wallet-container">
+        <h2>📀 Digital Wallet</h2>
+        <p>Balance: $<span id="balance">1000</span></p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <p>Boxes Purchased: <span id="boxesBought">0</span>/1000</p>
+    </div>
+
+    <section id="achievements">
+        <h3>🏆 Achievements</h3>
+        <div id="achievementsList"></div>
+    </section>
+
+    <div class="box-grid" id="boxContainer"></div>
+
+    <div id="purchasePanel">
+        <input type="number" id="quantity" min="1" max="1000" placeholder="Boxes to purchase">
+        <button onclick="purchaseBoxes()">Buy Boxes ($1 each)</button>
+        <p id="errorMessage" style="color: #e74c3c"></p>
+    </div>
+
+    <script>
+        let userBalance = 1000;
+        let boxesPurchased = 0;
+        const achievements = [
+            { id: 1, name: "First Purchase", earned: false },
+            { id: 2, name: "Box Collector (100)", earned: false },
+            { id: 3, name: "Master Investor (500)", earned: false },
+            { id: 4, name: "Box Kingpin (1000)", earned: false }
+        ];
+
+        function updateDisplay() {
+            document.getElementById('balance').textContent = userBalance;
+            document.getElementById('boxesBought').textContent = boxesPurchased;
+            document.querySelector('.progress-fill').style.width = 
+                (boxesPurchased / 10) + '%';
+            
+            checkAchievements();
+        }
+
+        function purchaseBoxes() {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            if (quantity * 1 > userBalance) {
+                showError('Insufficient funds!');
+                return;
+            }
+            
+            userBalance -= quantity;
+            boxesPurchased += quantity;
+            
+            animatePurchase(quantity);
+            updateDisplay();
+        }
+
+        function animatePurchase(qty) {
+            const container = document.getElementById('boxContainer');
+            for (let i = 0; i < qty; i++) {
+                const box = document.createElement('div');
+                box.className = 'box';
+                box.textContent = '📦';
+                container.appendChild(box);
+                
+                setTimeout(() => {
+                    box.style.transform = 'scale(1.2)';
+                    setTimeout(() => box.remove(), 500);
+                }, i * 50);
+            }
+        }
+
+        function checkAchievements() {
+            const achievementsEarned = achievements.filter(a => {
+                if (a.earned) return false;
+                switch(a.id) {
+                    case 1: return boxesPurchased >= 1;
+                    case 2: return boxesPurchased >= 100;
+                    case 3: return boxesPurchased >= 500;
+                    case 4: return boxesPurchased >= 1000;
+                }
+            });
+
+            achievementsEarned.forEach(a => {
+                a.earned = true;
+                const badge = document.createElement('div');
+                badge.className = 'achievement-badge animate__animated animate__tada';
+                badge.textContent = a.name;
+                document.getElementById('achievementsList').appendChild(badge);
+            });
+        }
+
+        function showError(msg) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = msg;
+            setTimeout(() => errorEl.textContent = '', 3000);
+        }
+
+        // Initialize boxes
+        window.onload = () => {
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
